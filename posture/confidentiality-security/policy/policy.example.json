@@ -1,0 +1,22 @@
+{
+  "content_endpoints": {
+    "enabled": true,
+    "require_auth": true,
+    "require_explicit_header": true,
+    "explicit_header_name": "X-DADI-Allow-Content",
+    "explicit_header_value": "true"
+  },
+  "logging": {
+    "log_request_bodies": false,
+    "log_response_bodies": false,
+    "redact_headers": [
+      "authorization",
+      "cookie"
+    ],
+    "include_request_id": true
+  },
+  "exports": {
+    "allow_fixture_bytes_export": false,
+    "allow_manifest_only_export": true
+  }
+}

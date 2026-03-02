@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mettleforgelab.example/schemas/stage_input-v1.schema.json",
+  "title": "stage_input-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "docpack_sha256",
+    "prior_outputs",
+    "toolchain_manifest_sha256",
+    "params"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "stage_input-v1"
+    },
+    "stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "name",
+        "schema_version"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "docpack_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "prior_outputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sha256"
+      }
+    },
+    "prompt_bundle_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "toolchain_manifest_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "params": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{64}$"
+    }
+  }
+}

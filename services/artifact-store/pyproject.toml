@@ -1,0 +1,15 @@
+[project]
+name = "dadi-artifact-store"
+version = "0.1.0"
+description = "Artifact Store + Lineage Graph + Memoization layer (Postgres) for deterministic pipelines."
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn>=0.24",
+  "pydantic>=2.0",
+  "psycopg[binary]>=3.1",
+  "jsonschema>=4.18",
+]
+
+[tool.uvicorn]
+factory = false

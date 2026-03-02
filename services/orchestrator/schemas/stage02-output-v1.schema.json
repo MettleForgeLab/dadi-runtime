@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mettleforgelab.example/schemas/stage02-output-v1.schema.json",
+  "title": "stage02-output-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "results",
+    "citations",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "stage02-output-v1"
+    },
+    "stage": {
+      "$ref": "#/$defs/stage_meta"
+    },
+    "results": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "doc_profile",
+        "section_map",
+        "content_index",
+        "extraction_plan"
+      ],
+      "properties": {
+        "doc_profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "doc_types",
+            "confidence"
+          ],
+          "properties": {
+            "doc_types": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "section_map": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "section_id",
+              "title",
+              "span"
+            ],
+            "properties": {
+              "section_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string"
+              },
+              "span": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "page_start",
+                  "page_end"
+                ],
+                "properties": {
+                  "page_start": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "page_end": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "content_index": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tables",
+            "figures",
+            "key_blocks"
+          ],
+          "properties": {
+            "tables": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "table_id",
+                  "docpack_ref"
+                ],
+                "properties": {
+                  "table_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "docpack_ref": {
+                    "$ref": "#/$defs/docpack_ref"
+                  },
+                  "label": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "figures": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/docpack_ref"
+              }
+            },
+            "key_blocks": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/docpack_ref"
+              }
+            }
+          }
+        },
+        "extraction_plan": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "targets",
+            "priority"
+          ],
+          "properties": {
+            "targets": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "priority": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "target",
+                  "importance"
+                ],
+                "properties": {
+                  "target": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "importance": {
+                    "enum": [
+                      "low",
+                      "medium",
+                      "high"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/citation"
+      }
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{64}$"
+    },
+    "stage_meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "name",
+        "schema_version"
+      ],
+      "properties": {
+        "index": {
+          "const": 2
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
+          "const": "v1"
+        }
+      }
+    },
+    "docpack_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page",
+        "block_id"
+      ],
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "block_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "docpack_ref"
+      ],
+      "properties": {
+        "docpack_ref": {
+          "$ref": "#/$defs/docpack_ref"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_sha256",
+        "prompt_bundle_sha256"
+      ],
+      "properties": {
+        "input_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "prompt_bundle_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    }
+  }
+}

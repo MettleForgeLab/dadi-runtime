@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mettleforgelab.example/schemas/stage04-output-v1.schema.json",
+  "title": "stage04-output-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "results",
+    "citations",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "stage04-output-v1"
+    },
+    "stage": {
+      "$ref": "#/$defs/stage_meta"
+    },
+    "results": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validation",
+        "reconciled_facts",
+        "issues",
+        "repair_requests"
+      ],
+      "properties": {
+        "validation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_pass",
+            "checks"
+          ],
+          "properties": {
+            "schema_pass": {
+              "type": "boolean"
+            },
+            "checks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "check_id",
+                  "status",
+                  "detail",
+                  "refs"
+                ],
+                "properties": {
+                  "check_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "status": {
+                    "enum": [
+                      "pass",
+                      "warn",
+                      "fail"
+                    ]
+                  },
+                  "detail": {
+                    "type": "string"
+                  },
+                  "refs": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/docpack_ref"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "reconciled_facts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "severity",
+              "type",
+              "message",
+              "refs"
+            ],
+            "properties": {
+              "severity": {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              },
+              "type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1
+              },
+              "refs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/docpack_ref"
+                }
+              }
+            }
+          }
+        },
+        "repair_requests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "need",
+              "refs"
+            ],
+            "properties": {
+              "need": {
+                "type": "string",
+                "minLength": 1
+              },
+              "target_fact_id": {
+                "type": "string"
+              },
+              "refs": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/docpack_ref"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/citation"
+      }
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{64}$"
+    },
+    "stage_meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "name",
+        "schema_version"
+      ],
+      "properties": {
+        "index": {
+          "const": 4
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
+          "const": "v1"
+        }
+      }
+    },
+    "docpack_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page",
+        "block_id"
+      ],
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "block_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "docpack_ref"
+      ],
+      "properties": {
+        "docpack_ref": {
+          "$ref": "#/$defs/docpack_ref"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_sha256"
+      ],
+      "properties": {
+        "input_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "prompt_bundle_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    }
+  }
+}

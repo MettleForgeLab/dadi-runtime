@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mettleforgelab.example/schemas/deliverable_manifest-v1.schema.json",
+  "title": "deliverable_manifest-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "tenant_id",
+    "deliverable_id",
+    "pipeline_run_id",
+    "deliverable_status",
+    "artifacts",
+    "signature",
+    "closure_mode"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "deliverable_manifest-v1"
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deliverable_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pipeline_run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deliverable_status": {
+      "enum": [
+        "draft",
+        "final",
+        "sent",
+        "superseded"
+      ]
+    },
+    "stage06_output_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-fA-F0-9]{64}$"
+    },
+    "docx_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-fA-F0-9]{64}$"
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sha256",
+          "artifact_type",
+          "media_type",
+          "byte_length"
+        ],
+        "properties": {
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "artifact_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "schema_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "media_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "byte_length": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "alg",
+        "kid",
+        "sig"
+      ],
+      "properties": {
+        "alg": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kid": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sig": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "closure_mode": {
+      "type": "string",
+      "enum": [
+        "stage_runs_v1"
+      ]
+    }
+  }
+}

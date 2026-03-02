@@ -1,0 +1,162 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+  actions: read
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+          pip install boto3 cryptography PyJWT[crypto]
+
+- name: Preflight (fail-closed)
+  run: |
+    python - <<'PY'
+    import os, sys
+    required = [
+      "AWS_ROLE_TO_ASSUME",
+      "AWS_REGION",
+      "AWS_KMS_KEY_ID",
+      "DADI_SIGNING_KID",
+            "REVOCATION_FEED_URL",
+    ]
+    missing = [k for k in required if not (os.getenv(k) or "").strip()]
+    if missing:
+      print("Missing required secrets/env:", ", ".join(missing))
+      sys.exit(2)
+    print("Preflight OK")
+    PY
+  env:
+    AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+    AWS_REGION: ${{ secrets.AWS_REGION }}
+    AWS_KMS_REVOCATION_KEY_ID: ${{ secrets.AWS_KMS_REVOCATION_KEY_ID }}
+    REVOCATION_SIGNING_KID: ${{ secrets.REVOCATION_SIGNING_KID }}
+
+
+      - name: Configure AWS credentials (GitHub OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Verify release manifest
+        run: python scripts/verify_release_manifest.py
+
+      - name: Sign release manifest (AWS KMS)
+        run: python scripts/sign_release_manifest.py
+        env:
+          REVOCATION_SIGNING_PROVIDER: aws_kms
+          REVOCATION_SIGNING_KID: ${{ secrets.REVOCATION_SIGNING_KID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_KMS_REVOCATION_KEY_ID: ${{ secrets.AWS_KMS_REVOCATION_KEY_ID }}
+          AWS_KMS_SIGNING_ALG: ${{ secrets.AWS_KMS_SIGNING_ALG }}
+
+      - name: Verify release attestation
+        run: python scripts/verify_release_attestation.py
+
+      - name: Export release public keys (AWS KMS)
+        run: python scripts/export_release_public_keys.py
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_KMS_REVOCATION_KEY_ID: ${{ secrets.AWS_KMS_REVOCATION_KEY_ID }}
+
+      - name: External verify (standalone verifier)
+        run: python tools/release-verifier/verify_release.py --release-dir . --public-keys RELEASE_PUBLIC_KEYS.json
+            tools/release-verifier/release-verifier.zip
+            SBOM.cdx.json
+            SBOM.spdx.json
+            PROVENANCE.json
+            PROVENANCE_ATTESTATION.json
+
+- name: Adversarial suite gate (fail-closed)
+  run: |
+    python tools/adversarial-suite/run_all.py --release-dir . --mode expect_failure --out adversarial_report.json
+
+- name: Upload adversarial report
+  uses: actions/upload-artifact@v4
+  with:
+    name: adversarial-report
+    path: adversarial_report.json
+
+
+- name: Audit verifier gate (final)
+  run: |
+    python tools/release-verifier/audit_verify.py --release-dir . --out audit_report.json
+
+- name: Upload audit report
+  uses: actions/upload-artifact@v4
+  with:
+    name: audit-report
+    path: audit_report.json
+
+      - name: Build release verifier bundle
+        run: |
+          python tools/release-verifier/package_verifier.py
+
+
+- name: Compute verifier bundle sha256
+  run: |
+    sha256sum tools/release-verifier/release-verifier.zip | tee release-verifier.sha256
+
+- name: Attest release-verifier.zip
+  run: |
+    python scripts/attest_asset.py --asset tools/release-verifier/release-verifier.zip --out release-verifier.attestation.json
+  env:
+    REVOCATION_SIGNING_PROVIDER: aws_kms
+    REVOCATION_SIGNING_KID: ${{ secrets.REVOCATION_SIGNING_KID }}
+    AWS_REGION: ${{ secrets.AWS_REGION }}
+    AWS_KMS_REVOCATION_KEY_ID: ${{ secrets.AWS_KMS_REVOCATION_KEY_ID }}
+    AWS_KMS_SIGNING_ALG: ${{ secrets.AWS_KMS_SIGNING_ALG }}
+
+- name: Verify verifier bundle attestation
+  run: |
+    python scripts/verify_asset_attestation.py --asset tools/release-verifier/release-verifier.zip --attestation release-verifier.attestation.json --public-keys RELEASE_PUBLIC_KEYS.json
+
+
+- name: Procurement gate (final, requires fresh revocations)
+  run: |
+    python tools/release-verifier/audit_verify.py --release-dir . --profile procurement --revocation-feed-url "${REVOCATION_FEED_URL}" --max-feed-age-hours 72 --out audit_report_procurement.json
+  env:
+    REVOCATION_FEED_URL: ${{ secrets.REVOCATION_FEED_URL }}
+
+- name: Upload procurement audit report
+  uses: actions/upload-artifact@v4
+  with:
+    name: audit-report-procurement
+    path: audit_report_procurement.json
+      - name: Package release zip
+        run: zip -r release.zip . -x "*.git*"
+
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release.zip
+            RELEASE_MANIFEST.json
+            RELEASE_ATTESTATION.json
+            RELEASE_PUBLIC_KEYS.json
+            tools/release-verifier/release-verifier.zip
+            SBOM.cdx.json
+            SBOM.spdx.json
+            PROVENANCE.json
+            PROVENANCE_ATTESTATION.json
+          generate_release_notes: true

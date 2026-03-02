@@ -1,0 +1,8 @@
+{
+  "revoked_reason": null,
+  "schema_version": "release_status-v1",
+  "status": "active",
+  "superseded_by": null,
+  "updated_at_utc": "2026-02-28T03:57:05Z",
+  "version": "v0.2.0-compliance"
+}

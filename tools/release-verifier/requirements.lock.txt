@@ -1,0 +1,3 @@
+# Locked dependencies for tools/release-verifier (versions pinned; hashes not embedded in offline bundle)
+cryptography==42.0.8
+PyJWT==2.9.0

@@ -1,0 +1,83 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: dadi
+      POSTGRES_PASSWORD: dadi
+      POSTGRES_DB: dadi
+    ports:
+      - "5432:5432"
+    volumes:
+      - dadi_db:/var/lib/postgresql/data
+
+
+idp:
+  build:
+    context: ../../services/idp_stub
+  environment:
+    IDP_ISSUER: http://idp:9000
+    IDP_AUDIENCE: audience
+    IDP_TOKEN_TTL_SECONDS: "3600"
+    IDP_KEY_ID: dev-k1
+  ports:
+    - "9000:9000"
+
+  gateway:
+    build:
+      context: ./gateway
+    environment:
+      DATABASE_URL: postgresql://dadi:dadi@db:5432/dadi
+      DADI_ENV: prod
+      DADI_SIGNING_PROVIDER: aws_kms
+      DADI_SIGNING_KID: kms-prod-k1
+      AWS_REGION: us-east-1
+      AWS_KMS_KEY_ID: replace-with-kms-key-arn
+      DADI_AUTH_MODE: oidc
+      DADI_JWT_HS256_SECRET: dev-secret
+      DADI_TENANT_CLAIM: tenant_id
+                  DADI_OIDC_ISSUER: https://issuer.example
+                  DADI_OIDC_AUDIENCE: audience
+                  DADI_OIDC_JWKS_URL: https://issuer.example/.well-known/jwks.json
+      DADI_SCOPE_CLAIM: scope
+      DADI_CONTENT_SCOPE: artifact:read_bytes
+      DADI_BUNDLE_SIGNING_SECRET: dev-bundle-secret
+      DADI_BUNDLE_SIGNING_ALG: hmac-sha256
+      DADI_BUNDLE_SIGNING_KID: dev
+    depends_on:
+      - db
+    command: sh -lc \"alembic upgrade head && uvicorn dadi_gateway.app:app --host 0.0.0.0 --port 8000\"
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "
+      psql ${DATABASE_URL} -f /app/sql/schema.sql &&
+      psql ${DATABASE_URL} -f /app/sql/tenant_isolation_migration.sql &&
+      psql ${DATABASE_URL} -f /app/sql/enable_rls.sql &&
+      psql ${DATABASE_URL} -f /app/sql/regeneration_plans.sql &&
+      psql ${DATABASE_URL} -f /app/sql/deliverables.sql &&
+      psql ${DATABASE_URL} -f /app/sql/deliverables_record_migration.sql &&
+      psql ${DATABASE_URL} -f /app/sql/deliverable_bundles.sql &&
+      psql ${DATABASE_URL} -f /app/sql/deliverable_evidence.sql &&
+      psql ${DATABASE_URL} -f /app/sql/revocation.sql &&
+      psql ${DATABASE_URL} -f /app/sql/idempotency.sql &&
+      psql ${DATABASE_URL} -f /app/sql/audit_events.sql &&
+      psql ${DATABASE_URL} -f /app/sql/signing_public_keys.sql &&
+      uvicorn dadi_gateway.app:app --host 0.0.0.0 --port 8000
+      "
+
+  ui:
+    build:
+      context: ./ui
+    environment:
+      NEXT_PUBLIC_API_BASE: http://gateway:8000
+    depends_on:
+      - gateway
+    ports:
+      - "3000:3000"
+    command: >
+      sh -c "npm install && npm run build && npm run start -- -p 3000"
+
+volumes:
+  dadi_db:

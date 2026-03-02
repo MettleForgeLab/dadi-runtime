@@ -1,0 +1,9 @@
+[project]
+name = "dadi-regression-harness"
+version = "0.1.0"
+description = "Deterministic regression harness for DADI-style pipelines (fixtures, replay, verification)."
+requires-python = ">=3.10"
+dependencies = [
+  "psycopg[binary]>=3.1",
+  "jsonschema>=4.18",
+]

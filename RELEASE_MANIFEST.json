@@ -1,0 +1,21 @@
+{
+  "created_at_utc": "2026-02-28T03:11:01Z",
+  "critical_file_hashes": {
+    ".github/workflows/compliance-gate.yml": "2ad818fa0bf456e8ebb0e8ad308108cb023499e5ca83816f51002a6341c884ff",
+    ".github/workflows/migrations.yml": "9671a26b273f217badc59a8746aed7bd3dd9ef28e3ea97e04cce4592bbbef076",
+    "docs/compliance/AUTHZ_MATRIX.md": "4ee13de77392437b9b0faf03e5874b9ad10ac367b8d40eb473d09e7540cec508",
+    "docs/compliance/MIGRATIONS.md": "a0d039908109d267419fe703f8a16a1676a2358c041e304a8855c1815f3b9eea",
+    "docs/compliance/THREAT_MODEL.md": "6ad2582ee9e0977a9fd6a8e3971761e5a889a4c1f3d7a2bdcc2a3ea52dcada34",
+    "services/gateway/migrations/checksums.json": "15568bdf733792dd17c6ee3ae2d3ad1e87852620fea87bb7bf26683658c03453",
+    "services/gateway/migrations/versions/0001_baseline.py": "aa46c47827e1bba2b4ee86362dd59d84bf0c5c71b7b2b58e9c9472f763766622"
+  },
+  "git_commit": "unknown",
+  "missing_expected_files": [],
+  "notes": [
+    "tree_sha256 is computed over the sorted set of critical_file_hashes lines: '<sha256>  <path>'.",
+    "Zip-file SHA256 is intentionally not included to avoid self-referential instability."
+  ],
+  "schema_version": "release_manifest-v1",
+  "tree_sha256": "13ef0b2a12ebb2910c23ee8f3f358e7fd1d878eb15f451c44369b080d2c8c906",
+  "version": "v0.2.0-compliance"
+}

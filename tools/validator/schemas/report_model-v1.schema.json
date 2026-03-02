@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mettleforgelab.example/schemas/report_model-v1.schema.json",
+  "title": "report_model-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "report"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "report_model-v1"
+    },
+    "report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "summary",
+        "sections"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report_block"
+          },
+          "minItems": 1
+        },
+        "sections": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "section_id",
+              "heading",
+              "blocks"
+            ],
+            "properties": {
+              "section_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "heading": {
+                "type": "string",
+                "minLength": 1
+              },
+              "blocks": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/report_block"
+                }
+              }
+            }
+          }
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report_block"
+          }
+        },
+        "appendix": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "docpack_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page",
+        "block_id"
+      ],
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "block_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "report_block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "paragraph",
+            "bullet",
+            "table"
+          ]
+        },
+        "text": {
+          "type": "string"
+        },
+        "table_ref": {
+          "type": "string"
+        },
+        "caption": {
+          "type": "string"
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/docpack_ref"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "paragraph",
+                  "bullet"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "text"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "table"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "table_ref"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

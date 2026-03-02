@@ -1,0 +1,15 @@
+{
+  "audit_events.sql": "70c0b677c2c3824775cb3be294949af0e19ac5e711b573902c9c507f85bca346",
+  "audit_hash_chain.sql": "c4c9322b4555d20c9ce7ed1775c4b8d986dbd0a030ec2fdbcddc6871664e4804",
+  "deliverable_bundles.sql": "d1eba9ba632353b2114c1d40ed0533127b520ca7bb62dc2cf8d115f44ed0e2d5",
+  "deliverable_evidence.sql": "f6015317009b588b5d0e0adff848a03883d1a2aa7b03983b4cad86b388aed1dd",
+  "deliverables.sql": "a7830a596bf796bb5e3cb982402c13e09b47bdb65f88b8b5d29263f6bba158ec",
+  "deliverables_record_migration.sql": "79176daf62bbb47653df8dcdb51efa4c7a747f802dccd709585e7350fffad6b1",
+  "enable_rls.sql": "ec040634724f4218e1c847bb2bde789ea7ff45af1f92ae8547ce619bc5bf953a",
+  "idempotency.sql": "2de5cf7877053f2540a37c4e1f68151ea8fa919c6c06fd00f777c0e873643c48",
+  "regeneration_plans.sql": "b08cbbb06de0feda3bad141971b53eb76b20855644bd3435d2b5572ae9d998d5",
+  "revocation.sql": "ed856e3720e697ab3080b89f2d6a611ebacafcb03829ad67d60f05d9f159a338",
+  "schema.sql": "b3f9572c675234cedbecb18a6e8823a245e8934453ac202612e6dc5fc05d3764",
+  "signing_public_keys.sql": "a4ccbbc524894a3bd4427365a77ee45faa8ddd657ed819df9a646cf609be5725",
+  "tenant_isolation_migration.sql": "13ac657d1596cfee715a6c52dbd8109b58db44bba0d580eac61a9699ff80be19"
+}

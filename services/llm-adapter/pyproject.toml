@@ -1,0 +1,9 @@
+[project]
+name = "dadi-llm-adapter"
+version = "0.1.0"
+description = "Deterministic envelope + capture adapter for LLM calls (request/response artifacts, replay, drift detection)."
+requires-python = ">=3.10"
+dependencies = [
+  "psycopg[binary]>=3.1",
+  "pydantic>=2.0",
+]

@@ -1,0 +1,33 @@
+name: Revoke Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Revocation reason"
+        required: true
+      superseded_by:
+        description: "Superseding version (optional)"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  revoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Revoke release status
+        run: |
+          python scripts/revoke_release.py --reason "${{ github.event.inputs.reason }}" --superseded-by "${{ github.event.inputs.superseded_by }}"
+
+      - name: Commit updated RELEASE_STATUS.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add RELEASE_STATUS.json
+          git commit -m "Revoke release: ${{ github.event.inputs.reason }}"
+          git push

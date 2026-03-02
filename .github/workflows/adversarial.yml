@@ -1,0 +1,25 @@
+name: Adversarial Suite
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  adversarial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run adversarial suite (expect verifiers to fail)
+        run: |
+          python tools/adversarial-suite/run_all.py --release-dir . --mode expect_failure --out adversarial_report.json
+
+      - name: Upload adversarial report
+        uses: actions/upload-artifact@v4
+        with:
+          name: adversarial-report
+          path: adversarial_report.json

@@ -1,0 +1,3 @@
+-- Audit hash chaining migration (no-op if columns already present)
+-- Version: v0.1
+-- Columns included in audit_events.sql in this branch.

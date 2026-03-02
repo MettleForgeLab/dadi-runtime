@@ -1,0 +1,14 @@
+{
+  "deliverable_evidence_manifest-v1": "deliverable_evidence_manifest-v1.schema.json",
+  "deliverable_manifest-v1": "deliverable_manifest-v1.schema.json",
+  "deliverable_record-v1": "deliverable_record-v1.schema.json",
+  "docpack-v1": "docpack-v1.schema.json",
+  "render_docx_output-v1": "render_docx_output-v1.schema.json",
+  "render_input-v1": "render_input-v1.schema.json",
+  "report_model-v1": "report_model-v1.schema.json",
+  "stage02-output-v1": "stage02-output-v1.schema.json",
+  "stage03-output-v1": "stage03-output-v1.schema.json",
+  "stage04-output-v1": "stage04-output-v1.schema.json",
+  "stage05-output-v1": "stage05-output-v1.schema.json",
+  "stage_input-v1": "stage_input-v1.schema.json"
+}

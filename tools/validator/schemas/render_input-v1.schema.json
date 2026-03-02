@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mettleforgelab.example/schemas/render_input-v1.schema.json",
+  "title": "render_input-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "report_model_sha256",
+    "template_sha256",
+    "render_params",
+    "toolchain_manifest_sha256"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "render_input-v1"
+    },
+    "report_model_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "template_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "render_params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "style"
+      ],
+      "properties": {
+        "format": {
+          "enum": [
+            "pdf",
+            "docx"
+          ]
+        },
+        "style": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "toolchain_manifest_sha256": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{64}$"
+    }
+  }
+}

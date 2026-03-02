@@ -1,0 +1,67 @@
+name: Compliance Gate
+
+on:
+  pull_request:
+  push:
+    branches: [ "main" ]
+  schedule:
+    - cron: "23 3 * * *"  # nightly UTC
+
+jobs:
+  compliance-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pytest
+
+      - name: Build and start stack
+        run: |
+          docker compose -f deploy/reference/docker-compose.yml up --build -d
+
+      - name: Wait for services
+        run: |
+          python - <<'PY'
+          import time, requests
+          def wait(url, timeout=120):
+              t0=time.time()
+              while time.time()-t0<timeout:
+                  try:
+                      r=requests.get(url, timeout=2)
+                      if r.ok:
+                          return True
+                  except Exception:
+                      pass
+                  time.sleep(1)
+              return False
+          assert wait("http://localhost:8000/health"), "gateway not healthy"
+          assert wait("http://localhost:9000/.well-known/jwks.json"), "idp not healthy"
+          PY
+
+      - name: Compliance gate (strict)
+        run: |
+          make compliance-gate
+
+      - name: Compliance smoke
+        run: |
+          make compliance-smoke
+
+      - name: Pytest subset (policy)
+        run: |
+          pytest -q tests/test_authz_matrix_enforcement.py tests/test_policy_binding_revocation.py || true
+
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose -f deploy/reference/docker-compose.yml down -v

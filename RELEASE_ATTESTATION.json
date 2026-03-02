@@ -1,0 +1,11 @@
+{
+  "manifest_sha256": "22dfbe2516d703be6fc6c4162d3a2a3673579c8818c2adbe8ba89d079a9ad922",
+  "schema_version": "release_attestation-v1",
+  "signature": {
+    "alg": "ed25519",
+    "kid": "release-dev-k1",
+    "note": "Dev attestation key embedded for offline verification. Production should sign via KMS and distribute public keys out-of-band.",
+    "public_key_b64url": "IfoFo1kYHR3D3Q9yK3abT6FDCuj51y9qHZkRXzleItA",
+    "sig": "1T_pMU2_4i9ZslH1Yd3X56ACWlSNusSJfBHi1Aw_usSa11QDTN05t8OUqIHDlxOKexpXSJhBOdIZtTYav4opDg"
+  }
+}

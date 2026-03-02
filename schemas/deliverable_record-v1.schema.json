@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mettleforgelab.example/schemas/deliverable_record-v1.schema.json",
+  "title": "deliverable_record-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "tenant_id",
+    "deliverable_id",
+    "pipeline_run_id",
+    "status",
+    "created_at",
+    "artifacts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "deliverable_record-v1"
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deliverable_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pipeline_run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "final",
+        "sent",
+        "superseded"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supersedes_deliverable_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage06_output_sha256",
+        "docx_sha256"
+      ],
+      "properties": {
+        "stage06_output_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "docx_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-fA-F0-9]{64}$"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,57 @@
+name: Dev Release (Unsigned Infrastructure)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dev-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests cryptography PyJWT[crypto]
+
+      - name: Verify release manifest
+        run: python scripts/verify_release_manifest.py
+
+      - name: Sign release manifest (dev_ed25519)
+        run: python scripts/sign_release_manifest.py
+        env:
+          DADI_SIGNING_PROVIDER: dev_ed25519
+          DADI_SIGNING_KID: dev-k1
+
+      - name: Verify release attestation
+        run: python scripts/verify_release_attestation.py
+
+      - name: Export release public keys (dev_ed25519)
+        run: python scripts/export_release_public_keys.py
+        env:
+          RELEASE_ED25519_PUBLIC_KEY_B64URL: ${{ secrets.RELEASE_ED25519_PUBLIC_KEY_B64URL }}
+
+      - name: External verify (standalone verifier)
+        run: python tools/release-verifier/verify_release.py --release-dir . --public-keys RELEASE_PUBLIC_KEYS.json
+
+      - name: Package release zip
+        run: zip -r release.zip . -x "*.git*"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-release-artifacts
+          path: |
+            release.zip
+            RELEASE_MANIFEST.json
+            RELEASE_ATTESTATION.json
+            RELEASE_PUBLIC_KEYS.json

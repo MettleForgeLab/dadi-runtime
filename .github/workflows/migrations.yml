@@ -1,0 +1,51 @@
+name: Migrations
+
+on:
+  pull_request:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: dadi
+          POSTGRES_PASSWORD: dadi
+          POSTGRES_DB: dadi
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U dadi -d dadi"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install gateway deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e services/gateway
+          pip install psycopg[binary] pytest
+
+      - name: Run alembic upgrade
+        env:
+          DATABASE_URL: postgresql://dadi:dadi@localhost:5432/dadi
+          DADI_ENV: prod
+        run: |
+          alembic upgrade head
+          alembic current
+
+      - name: Schema contract test
+        env:
+          DATABASE_URL: postgresql://dadi:dadi@localhost:5432/dadi
+        run: |
+          pytest -q tests/test_schema_contract.py

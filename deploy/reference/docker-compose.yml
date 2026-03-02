@@ -1,0 +1,77 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: dadi
+      POSTGRES_PASSWORD: dadi
+      POSTGRES_DB: dadi
+    ports:
+      - "5432:5432"
+    volumes:
+      - dadi_db:/var/lib/postgresql/data
+
+  idp:
+    build:
+      context: ../../services/idp_stub
+    environment:
+      IDP_ISSUER: http://idp:9000
+      IDP_AUDIENCE: audience
+      IDP_TOKEN_TTL_SECONDS: "3600"
+      IDP_KEY_ID: dev-k1
+    ports:
+      - "9000:9000"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  gateway:
+    build:
+      context: ./gateway
+    environment:
+      DATABASE_URL: postgresql+psycopg://dadi:dadi@db:5432/dadi
+      DADI_ENV: dev
+      DADI_SIGNING_PROVIDER: dev_ed25519
+      DADI_SIGNING_KID: kms-prod-k1
+      AWS_REGION: us-east-1
+      AWS_KMS_KEY_ID: replace-with-kms-key-arn
+      DADI_AUTH_MODE: oidc
+      DADI_JWT_HS256_SECRET: dev-secret
+      DADI_TENANT_CLAIM: tenant_id
+      DADI_OIDC_ISSUER: http://idp:9000
+      DADI_OIDC_AUDIENCE: audience
+      DADI_OIDC_JWKS_URL: http://idp:9000/.well-known/jwks.json
+      DADI_SCOPE_CLAIM: scope
+      DADI_CONTENT_SCOPE: artifact:read_bytes
+      DADI_BUNDLE_SIGNING_SECRET: dev-bundle-secret
+      DADI_BUNDLE_SIGNING_ALG: hmac-sha256
+      DADI_BUNDLE_SIGNING_KID: dev
+    depends_on:
+      - db
+      - idp
+      - redis
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "
+      until psql 'postgresql://dadi:dadi@db:5432/dadi' -c 'select 1' >/dev/null 2>&1; do echo 'waiting for db...'; sleep 1; done &&
+      psql 'postgresql://dadi:dadi@db:5432/dadi' -f /app/sql/schema.sql &&
+      psql 'postgresql://dadi:dadi@db:5432/dadi' -f /app/sql/regeneration_plans.sql &&
+      alembic -c /app/alembic.ini stamp 0001_baseline &&
+      uvicorn dadi_gateway.app:app --host 0.0.0.0 --port 8000
+      "
+
+  ui:
+    build:
+      context: ../../ui/artifact-browser
+      dockerfile: ../../deploy/reference/ui/Dockerfile
+    environment:
+      NEXT_PUBLIC_API_BASE: http://gateway:8000
+    depends_on:
+      - gateway
+    ports:
+      - "3000:3000"
+
+volumes:
+  dadi_db:
